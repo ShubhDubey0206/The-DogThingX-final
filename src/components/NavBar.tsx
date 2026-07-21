@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ShoppingCart, Menu, X, Heart, Package, MessageCircle, LogOut } from "lucide-react";
+import { ShoppingCart, Menu, X, Heart, Package, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
@@ -13,7 +13,6 @@ import { useAuth } from "@/context/AuthContext";
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
-  { label: "Pets", href: "/pets" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/#contact" },
 ];
@@ -91,15 +90,11 @@ export function NavBar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0" data-testid="link-logo">
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-              <ellipse cx="16" cy="21" rx="7" ry="6" fill="#F5A623" />
-              <ellipse cx="9" cy="13" rx="2.5" ry="3.5" fill="#F5A623" />
-              <ellipse cx="23" cy="13" rx="2.5" ry="3.5" fill="#F5A623" />
-              <ellipse cx="13" cy="10" rx="2" ry="3" fill="#F5A623" />
-              <ellipse cx="19" cy="10" rx="2" ry="3" fill="#F5A623" />
-              <path d="M16 17 C14 19 13 22 14 24 C15 26 17 26 18 24 C19 22 18 19 16 17Z" fill="#d4891a" />
-            </svg>
-            <span className="font-extrabold text-[#29ABE2] text-lg hidden sm:block">The Dog Thingx</span>
+            <img
+              src="/logo.jpeg"
+              alt="The Dog Thingx logo"
+              className="h-15 w-auto object-contain"
+            />
           </Link>
 
           {/* Center nav */}
@@ -198,15 +193,6 @@ export function NavBar() {
                         <Package size={15} className={pathname?.startsWith("/orders") ? "text-[#F5A623]" : "text-muted-foreground"} />
                         My Orders
                         {pathname?.startsWith("/orders") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#F5A623]" />}
-                      </button>
-                      <button
-                        onClick={() => { setAvatarOpen(false); router.push("/adoptions"); }}
-                        data-testid="link-my-enquiries"
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-card transition-colors text-left ${pathname === "/adoptions" ? "text-[#F5A623] bg-card" : ""}`}
-                      >
-                        <MessageCircle size={15} className={pathname === "/adoptions" ? "text-[#F5A623]" : "text-muted-foreground"} />
-                        My Enquiries
-                        {pathname === "/adoptions" && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#F5A623]" />}
                       </button>
                       <div className="border-t border-border">
                         <button

@@ -30,7 +30,6 @@ export function Footer() {
               {[
                 { label: "Home", onClick: () => scrollTo("hero") },
                 { label: "Shop", href: "/shop" },
-                { label: "Pets", href: "/pets" },
                 { label: "About", href: "/about" },
                 { label: "Contact", onClick: () => scrollTo("footer") },
               ].map((item) =>

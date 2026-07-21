@@ -3,32 +3,23 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, ShoppingBag, Package, Users, MessageCircle,
-  Settings, ExternalLink, ArrowLeftRight, Menu, X, Cat, Archive,
+  LayoutDashboard, ShoppingBag, Package, Users,
+  Settings, ExternalLink, ArrowLeftRight, Menu, X, Archive,
 } from "lucide-react";
 import { useAdminAuth } from "@/context/AdminAuthContext";
-import { getAllAdminPets, getDeletedPetIds, getAllReviews, getStockQty } from "@/lib/storage";
-import { PETS } from "@/lib/pets";
+import { getAllReviews, getStockQty } from "@/lib/storage";
 import { toast } from "sonner";
 
 async function computeBadges() {
-  if (typeof window === "undefined") return { hasReservedPets: false, hasLowStock: false, pendingReviews: false };
+  if (typeof window === "undefined") return { hasLowStock: false, pendingReviews: false };
   try {
-    const [deletedIds, adminPets, reviews] = await Promise.all([
-      getDeletedPetIds(),
-      getAllAdminPets(),
-      getAllReviews(),
-    ]);
-    const combined = [...PETS, ...adminPets].reduce((acc, p) => { acc.set(p.id, p); return acc; }, new Map());
-    const allPets = Array.from(combined.values()).filter((p: any) => !deletedIds.includes(p.id)) as { id: string; status: string }[];
-    const lowStock = allPets.some((p) => getStockQty(p.id) <= 5);
+    const reviews = await getAllReviews();
     return {
-      hasReservedPets: allPets.some((p) => p.status === "reserved"),
-      hasLowStock: lowStock,
+      hasLowStock: false,
       pendingReviews: reviews.filter((r) => r.status === "pending").length > 0,
     };
   } catch {
-    return { hasReservedPets: false, hasLowStock: false, pendingReviews: false };
+    return { hasLowStock: false, pendingReviews: false };
   }
 }
 
@@ -36,7 +27,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const { adminUser, adminLogout } = useAdminAuth();
-  const [badges, setBadges] = useState({ hasReservedPets: false, hasLowStock: false, pendingReviews: false });
+  const [badges, setBadges] = useState({ hasLowStock: false, pendingReviews: false });
 
   useEffect(() => {
     computeBadges().then(setBadges).catch(() => {});
@@ -69,10 +60,8 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
     { icon: ShoppingBag, label: "Orders", path: "/admin/orders" },
     { icon: Package, label: "Products", path: "/admin/products" },
     { icon: Users, label: "Customers", path: "/admin/customers" },
-    { icon: Cat, label: "Pets", path: "/admin/pets", dot: badges.hasReservedPets ? "orange" : null },
     { icon: Archive, label: "Inventory", path: "/admin/inventory", dot: badges.hasLowStock ? "yellow" : null },
     { icon: Settings, label: "Settings", path: "/admin/settings" },
-    { icon: MessageCircle, label: "Enquiries", path: "/admin/enquiries", comingSoon: true },
   ];
 
   return (
