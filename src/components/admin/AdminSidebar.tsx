@@ -84,17 +84,16 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </div>
       <div className="border-b border-[#1F1F1F] mx-4 mb-3" />
       <nav role="navigation" aria-label="Admin navigation" className="flex-1 px-3 space-y-1 overflow-y-auto">
-        {navItems.map(({ icon: Icon, label, path, dot, comingSoon }) => {
+        {navItems.map(({ icon: Icon, label, path, dot }) => {
           const active = isActive(path);
           return (
-            <button key={path} onClick={() => handleNav(path, comingSoon)} className={navItemCls(path)}>
+            <button key={path} onClick={() => handleNav(path)} className={navItemCls(path)}>
               {active && <span className="absolute left-0 top-2 bottom-2 w-1 bg-[#F5A623] rounded-r-full" />}
               <span className="relative">
                 <Icon size={18} />
                 {dot && !active && <span className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${dot === "orange" ? "bg-[#F5A623]" : "bg-[#EAB308]"}`} />}
               </span>
               {label}
-              {comingSoon && <span className="ml-auto text-[10px] text-[#9B9B9B] bg-[#1A1A1A] px-1.5 py-0.5 rounded-full">Soon</span>}
             </button>
           );
         })}
