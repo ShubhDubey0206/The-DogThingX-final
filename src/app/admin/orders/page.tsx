@@ -327,7 +327,6 @@ function OrdersContent() {
                 </div>
                 <div className="border-t border-[#1F1F1F] pt-3 text-xs space-y-1">
                   <div className="flex justify-between text-[#9B9B9B]"><span>Subtotal</span><span>{formatPrice(selectedOrder.subtotal)}</span></div>
-                  <div className="flex justify-between text-[#9B9B9B]"><span>GST (18%)</span><span>{formatPrice(selectedOrder.gst)}</span></div>
                   <div className="flex justify-between font-bold text-[#F5F0EB] text-sm pt-1 border-t border-[#222]"><span>Grand Total</span><span className="text-[#F5A623]">{formatPrice(selectedOrder.total)}</span></div>
                 </div>
               </div>

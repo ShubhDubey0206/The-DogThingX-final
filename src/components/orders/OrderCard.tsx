@@ -70,7 +70,7 @@ export function OrderCard({ order, isLast }: OrderCardProps) {
         )}
       </div>
       <div className="flex items-center justify-between">
-        <button onClick={() => router.push(`/orders/${order.orderId}`)} data-testid={`button-view-order-${order.orderId}`} className="text-sm text-[#29ABE2] hover:underline">
+        <button onClick={() => router.push(`/orders/${encodeURIComponent(order.orderId)}`)} data-testid={`button-view-order-${order.orderId}`} className="text-sm text-[#29ABE2] hover:underline">
           View Details →
         </button>
         {order.status === "delivered" && (

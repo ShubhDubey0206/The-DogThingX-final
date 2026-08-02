@@ -7,7 +7,6 @@ import { PRODUCTS, Product } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
 import { FiltersSidebar } from "@/components/shop/FiltersSidebar";
 import { ProductQuickViewModal } from "@/components/shop/ProductQuickViewModal";
-import { OffersRail } from "@/components/shop/OffersRail";
 import { Footer } from "@/components/Footer";
 
 interface Filters {
@@ -91,7 +90,6 @@ function ShopContent() {
           <h1 className="text-3xl font-extrabold">Shop</h1>
           <p className="text-muted-foreground mt-1">{filtered.length} product{filtered.length !== 1 ? "s" : ""} found</p>
         </div>
-        <OffersRail />
         <div className="relative mb-6">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input

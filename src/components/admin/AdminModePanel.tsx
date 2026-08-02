@@ -6,8 +6,6 @@ import { motion } from "framer-motion";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 
 export function AdminModePanel() {
-  if (process.env.NEXT_PUBLIC_SHOW_ADMIN_PANEL !== 'true') return null;
-
   const pathname = usePathname();
   const router = useRouter();
   const { isAdminLoggedIn } = useAdminAuth();
@@ -17,7 +15,9 @@ export function AdminModePanel() {
     setMounted(true);
   }, []);
 
+  if (process.env.NEXT_PUBLIC_SHOW_ADMIN_PANEL !== 'true') return null;
   if (!mounted) return null;
+
 
   // Do not show the floating switcher panel when already inside admin section
   if (pathname?.startsWith("/admin")) return null;

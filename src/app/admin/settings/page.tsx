@@ -124,22 +124,10 @@ export default function AdminSettingsPage() {
                   className="rounded accent-[#F5A623] w-4 h-4 cursor-pointer"
                 />
               </div>
-
-              <div className="flex items-center justify-between pt-3">
-                <div>
-                  <div className="text-xs font-semibold text-white">Enable Promotional Offers</div>
-                  <div className="text-[10px] text-[#9B9B9B] mt-0.5">Show offers rail on shop</div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={config.enableOffers}
-                  onChange={() => handleToggleChange("enableOffers")}
-                  className="rounded accent-[#F5A623] w-4 h-4 cursor-pointer"
-                />
-              </div>
             </div>
           </div>
         </div>
+
 
         {/* Right column: General Settings & PIN Security */}
         <div className="md:col-span-2 space-y-6">
@@ -203,6 +191,20 @@ export default function AdminSettingsPage() {
                   onChange={(e) => setConfig({ ...config, address: e.target.value })}
                   className="w-full bg-[#0E0E0E] border border-[#1C1C1C] rounded-xl p-3 text-xs text-[#F5F0EB] focus:outline-none focus:border-[#F5A623] h-16 resize-none transition-colors"
                 />
+              </div>
+
+              <div className="border-t border-[#1F1F1F] pt-4">
+                <div>
+                  <label className="text-xs font-semibold text-[#9B9B9B] block mb-1">Free Delivery Radius (km)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={config.freeDeliveryRadiusKm || 4}
+                    onChange={(e) => setConfig({ ...config, freeDeliveryRadiusKm: Number(e.target.value) })}
+                    className="w-full bg-[#0E0E0E] border border-[#1C1C1C] rounded-xl px-4 py-2 text-xs text-[#F5F0EB] focus:outline-none focus:border-[#F5A623] transition-colors max-w-xs"
+                  />
+                  <div className="text-[10px] text-[#9B9B9B] mt-1">Delivery is free for customers within this distance of your store</div>
+                </div>
               </div>
 
               <div className="flex justify-end pt-2">

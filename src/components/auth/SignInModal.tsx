@@ -157,18 +157,6 @@ export function SignInModal({ open, onClose }: SignInModalProps) {
           >
             {isRegister ? "Already have an account? Sign in →" : "Don't have an account? Register →"}
           </button>
-
-          <p className="text-center text-xs text-muted-foreground pt-1">
-            Are you an admin?{" "}
-            <button
-              type="button"
-              onClick={() => { onClose(); router.push("/admin/login"); }}
-              className="text-[#F5A623] hover:underline font-medium"
-              data-testid="link-admin-signin"
-            >
-              Admin Panel →
-            </button>
-          </p>
         </div>
       </DialogContent>
     </Dialog>

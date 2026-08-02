@@ -36,6 +36,10 @@ export interface Order {
     pincode: string;
   };
   paymentMethod: "cod" | "online";
+  paymentStatus?: "pending" | "paid" | "failed";
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
   status: OrderStatus;
   statusHistory: {
     status: OrderStatus;
@@ -45,6 +49,7 @@ export interface Order {
   estimatedDelivery?: string;
   notes?: string;
 }
+
 
 export type AdoptionStatus =
   | "pending"
@@ -75,6 +80,15 @@ export interface AdoptionRequest {
 
 export type ReviewStatus = "pending" | "approved" | "rejected";
 
+export interface UserProfile {
+  email: string;
+  fullName: string;
+  phone: string;
+  street: string;
+  city: string;
+  pincode: string;
+}
+
 export interface Review {
   reviewId: string;
   userEmail: string;
@@ -101,6 +115,9 @@ export interface SiteConfig {
   gstRate: number;
   currency: string;
   deliveryEstimate: string;
+  freeDeliveryRadiusKm: number;
+  standardDeliveryFee: number;
+  deliveryNotice: string;
   enableWishlist: boolean;
   enableAdoption: boolean;
   enableReviews: boolean;
@@ -125,6 +142,9 @@ const DEFAULT_SITE_CONFIG: SiteConfig = {
   gstRate: 18,
   currency: "₹",
   deliveryEstimate: "3–5 business days",
+  freeDeliveryRadiusKm: 4,
+  standardDeliveryFee: 0,
+  deliveryNotice: "Free delivery within 4km radius of our shop in Talegaon, Pune",
   enableWishlist: true,
   enableAdoption: true,
   enableReviews: true,
@@ -310,7 +330,7 @@ export async function generateRequestId(): Promise<string> {
 // ── Orders ───────────────────────────────────────────────────────────────────
 
 export async function saveOrder(order: Order): Promise<void> {
-  const { error } = await supabase.from("orders").insert({
+  const payload: any = {
     order_id: order.orderId,
     user_email: order.userEmail,
     placed_at: order.placedAt,
@@ -320,14 +340,31 @@ export async function saveOrder(order: Order): Promise<void> {
     total: order.total,
     delivery_address: order.deliveryAddress,
     payment_method: order.paymentMethod,
+    payment_status: order.paymentStatus || (order.paymentMethod === "online" ? "paid" : "pending"),
+    razorpay_order_id: order.razorpayOrderId || null,
+    razorpay_payment_id: order.razorpayPaymentId || null,
+    razorpay_signature: order.razorpaySignature || null,
     status: order.status,
     status_history: order.statusHistory,
-    estimated_delivery: order.estimatedDelivery,
     notes: order.notes,
-  });
+  };
+
+  if (order.estimatedDelivery) {
+    payload.estimated_delivery = order.estimatedDelivery;
+  }
+
+  let { error } = await supabase.from("orders").insert(payload);
+
+  if (error && error.message.includes("estimated_delivery")) {
+    delete payload.estimated_delivery;
+    const retry = await supabase.from("orders").insert(payload);
+    error = retry.error;
+  }
 
   if (error) throw error;
 }
+
+
 
 export async function getOrders(userEmail: string): Promise<Order[]> {
   const { data, error } = await supabase
@@ -362,9 +399,18 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, no
     { status, timestamp: new Date().toISOString(), note },
   ];
 
+  const updatePayload: any = {
+    status,
+    status_history: updatedHistory,
+  };
+
+  if (status === "delivered") {
+    updatePayload.payment_status = "paid";
+  }
+
   const { error } = await supabase
     .from("orders")
-    .update({ status, status_history: updatedHistory })
+    .update(updatePayload)
     .eq("order_id", orderId);
 
   if (error) throw error;
@@ -657,3 +703,94 @@ export async function deleteReview(reviewId: string): Promise<void> {
   const { error } = await supabase.from("reviews").delete().eq("review_id", reviewId);
   if (error) throw error;
 }
+
+// ── User Profiles & Auto-fill ───────────────────────────────────────────────
+
+export async function getUserProfile(userEmail: string): Promise<UserProfile | null> {
+  if (!userEmail) return null;
+
+  // 1. Try local storage cache
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem(`dtx_profile_${userEmail}`);
+      if (cached) return JSON.parse(cached);
+    } catch {}
+  }
+
+  // 2. Query recent orders for delivery address
+  try {
+    const { data } = await supabase
+      .from("orders")
+      .select("delivery_address")
+      .eq("user_email", userEmail)
+      .order("placed_at", { ascending: false })
+      .limit(1);
+
+    if (data && data.length > 0 && data[0].delivery_address) {
+      const addr = data[0].delivery_address;
+      const profile: UserProfile = {
+        email: userEmail,
+        fullName: addr.name || "",
+        phone: addr.phone || "",
+        street: addr.street || "",
+        city: addr.city || "",
+        pincode: addr.pincode || "",
+      };
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`dtx_profile_${userEmail}`, JSON.stringify(profile));
+      }
+      return profile;
+    }
+  } catch {}
+
+  // 3. Query profiles table
+  try {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("email", userEmail)
+      .maybeSingle();
+
+    if (data) {
+      const profile: UserProfile = {
+        email: userEmail,
+        fullName: data.full_name || "",
+        phone: data.phone || "",
+        street: data.street || "",
+        city: data.city || "",
+        pincode: data.pincode || "",
+      };
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`dtx_profile_${userEmail}`, JSON.stringify(profile));
+      }
+      return profile;
+    }
+  } catch {}
+
+  return null;
+}
+
+export async function saveUserProfile(profile: UserProfile): Promise<void> {
+  if (!profile.email) return;
+
+  // Save to LocalStorage for instant access
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(`dtx_profile_${profile.email}`, JSON.stringify(profile));
+    } catch {}
+  }
+
+  // Upsert to Supabase profiles table
+  try {
+    const payload: any = {
+      email: profile.email,
+      full_name: profile.fullName,
+      phone: profile.phone,
+    };
+    if (profile.street) payload.street = profile.street;
+    if (profile.city) payload.city = profile.city;
+    if (profile.pincode) payload.pincode = profile.pincode;
+
+    await supabase.from("profiles").upsert(payload, { onConflict: "email" });
+  } catch {}
+}

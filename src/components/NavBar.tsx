@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ShoppingCart, Menu, X, Heart, Package, LogOut } from "lucide-react";
+import { ShoppingCart, Menu, X, Heart, Package, LogOut, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
@@ -178,22 +178,44 @@ export function NavBar() {
                           </div>
                         </div>
                       </div>
-                      <button
-                        onClick={() => { setAvatarOpen(false); toast("Coming soon!"); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-card transition-colors text-left"
-                      >
-                        <Heart size={15} className="text-muted-foreground" />
-                        My Wishlist
-                      </button>
-                      <button
-                        onClick={() => { setAvatarOpen(false); router.push("/orders"); }}
-                        data-testid="link-my-orders"
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-card transition-colors text-left ${pathname?.startsWith("/orders") ? "text-[#F5A623] bg-card" : ""}`}
-                      >
-                        <Package size={15} className={pathname?.startsWith("/orders") ? "text-[#F5A623]" : "text-muted-foreground"} />
-                        My Orders
-                        {pathname?.startsWith("/orders") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#F5A623]" />}
-                      </button>
+                      {currentUser?.user_metadata?.role === "admin" ? (
+                        <>
+                          <button
+                            onClick={() => { setAvatarOpen(false); router.push("/admin"); }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-[#F5A623] hover:bg-[#F5A623]/10 transition-colors text-left"
+                          >
+                            <Shield size={15} />
+                            Admin Dashboard
+                          </button>
+                          <button
+                            onClick={() => { setAvatarOpen(false); router.push("/admin/orders"); }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-card transition-colors text-left"
+                          >
+                            <Package size={15} className="text-muted-foreground" />
+                            Manage Customer Orders
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => { setAvatarOpen(false); toast("Coming soon!"); }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-card transition-colors text-left"
+                          >
+                            <Heart size={15} className="text-muted-foreground" />
+                            My Wishlist
+                          </button>
+                          <button
+                            onClick={() => { setAvatarOpen(false); router.push("/orders"); }}
+                            data-testid="link-my-orders"
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-card transition-colors text-left ${pathname?.startsWith("/orders") ? "text-[#F5A623] bg-card" : ""}`}
+                          >
+                            <Package size={15} className={pathname?.startsWith("/orders") ? "text-[#F5A623]" : "text-muted-foreground"} />
+                            My Orders
+                            {pathname?.startsWith("/orders") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#F5A623]" />}
+                          </button>
+                        </>
+                      )}
+
                       <div className="border-t border-border">
                         <button
                           onClick={() => { signOut(); setAvatarOpen(false); toast("Signed out. See you soon! 🐾"); }}

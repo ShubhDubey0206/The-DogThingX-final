@@ -84,8 +84,9 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </div>
       <div className="border-b border-[#1F1F1F] mx-4 mb-3" />
       <nav role="navigation" aria-label="Admin navigation" className="flex-1 px-3 space-y-1 overflow-y-auto">
-        {navItems.map(({ icon: Icon, label, path, dot }) => {
+        {navItems.map(({ icon: Icon, label, path, dot, comingSoon }: { icon: any; label: string; path: string; dot?: string | null; comingSoon?: boolean }) => {
           const active = isActive(path);
+
           return (
             <button key={path} onClick={() => handleNav(path)} className={navItemCls(path)}>
               {active && <span className="absolute left-0 top-2 bottom-2 w-1 bg-[#F5A623] rounded-r-full" />}

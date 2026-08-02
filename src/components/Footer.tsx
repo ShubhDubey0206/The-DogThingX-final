@@ -22,7 +22,7 @@ export function Footer() {
         </div>
 
         {/* Row 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           {/* Quick Links */}
           <div>
             <h4 className="font-bold mb-4 text-white">Quick Links</h4>
@@ -67,6 +67,28 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+            </ul>
+          </div>
+
+          {/* Legal & Policies */}
+          <div>
+            <h4 className="font-bold mb-4 text-white">Legal & Policies</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/privacy" className="text-white/60 hover:text-[#F5A623] transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="text-white/60 hover:text-[#F5A623] transition-colors">
+                  Terms & Conditions
+                </Link>
+              </li>
+              <li>
+                <Link href="/refund-policy" className="text-white/60 hover:text-[#F5A623] transition-colors">
+                  Refund & Return Policy
+                </Link>
+              </li>
             </ul>
           </div>
 
