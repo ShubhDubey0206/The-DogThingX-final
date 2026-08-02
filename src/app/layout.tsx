@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description:
     "The Dog Thingx is Pune's favourite pet shop. Shop premium pet food, accessories, grooming products and adopt dogs, cats, birds & fish. Talegaon Dabhade, Pune.",
   keywords: ["pet shop pune", "dog food pune", "cat accessories", "pet adoption pune", "the dog thingx"],
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

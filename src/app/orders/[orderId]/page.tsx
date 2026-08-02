@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { getOrderById, Order, getSiteConfig } from "@/lib/storage";
 import { StatusBadge } from "@/components/orders/StatusBadge";
 import { Footer } from "@/components/Footer";
+import { useAuth } from "@/context/AuthContext";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-IN", {
@@ -31,27 +32,41 @@ export default function OrderDetailsPage() {
   const router = useRouter();
   const rawId = params?.orderId as string;
   const orderId = rawId ? decodeURIComponent(rawId) : "";
+  const { currentUser, isLoggedIn } = useAuth();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const siteConfig = getSiteConfig();
 
+  // Auth guard — redirect unauthenticated users to home
   useEffect(() => {
-    if (orderId) {
-      (async () => {
-        try {
-          const found = await getOrderById(orderId);
-          setOrder(found);
-        } catch {
-          setOrder(null);
-        } finally {
-          setLoading(false);
-        }
-      })();
-    } else {
-      setLoading(false);
+    if (!isLoggedIn) {
+      router.replace("/");
     }
-  }, [orderId]);
+  }, [isLoggedIn, router]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !orderId) {
+      setLoading(false);
+      return;
+    }
+    (async () => {
+      try {
+        const found = await getOrderById(orderId);
+        // Ownership check: only show if the order belongs to this user
+        const isAdmin = currentUser?.user_metadata?.role === "admin";
+        if (found && !isAdmin && found.userEmail !== currentUser?.email) {
+          setOrder(null); // Don't expose other users' orders
+        } else {
+          setOrder(found);
+        }
+      } catch {
+        setOrder(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [orderId, isLoggedIn, currentUser]);
 
   if (loading) {
     return (

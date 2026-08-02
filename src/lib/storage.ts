@@ -310,12 +310,11 @@ function mapReviewRow(row: any): Review {
 // ── ID Generators ────────────────────────────────────────────────────────────
 
 export async function generateOrderId(): Promise<string> {
-  const { data, error } = await supabase.from("orders").select("order_id");
-  if (error) throw error;
-
-  const count = (data?.length || 0) + 1;
   const year = new Date().getFullYear();
-  return `DTX-${year}-${String(count).padStart(4, "0")}`;
+  // Use timestamp ms + 4 random hex chars to avoid race-condition duplicate IDs
+  const ts = Date.now().toString(36).toUpperCase().slice(-4);
+  const rand = Math.floor(Math.random() * 0xffff).toString(16).toUpperCase().padStart(4, "0");
+  return `DTX-${year}-${ts}${rand}`;
 }
 
 export async function generateRequestId(): Promise<string> {

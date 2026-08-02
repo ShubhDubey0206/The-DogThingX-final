@@ -63,6 +63,10 @@ export function CheckoutModal({ open, onClose }: CheckoutModalProps) {
   const [savedOrderId, setSavedOrderId] = useState<string>("");
   const savedRef = useRef(false);
 
+  // Snapshot of cart before clearCart() is called, so confirm screen stays populated
+  const [snapshotItems, setSnapshotItems] = useState(cartItems);
+  const [snapshotTotal, setSnapshotTotal] = useState(cartTotal);
+
   const tax = 0;
   const total = cartTotal;
 
@@ -201,6 +205,8 @@ export function CheckoutModal({ open, onClose }: CheckoutModalProps) {
 
     // 1. Cash On Delivery
     if (paymentMethod === "cod") {
+      setSnapshotItems([...cartItems]);
+      setSnapshotTotal(cartTotal);
       setStep("confirm");
       toast.success("Order placed! 🎉", { duration: 5000 });
       return;
@@ -285,6 +291,8 @@ export function CheckoutModal({ open, onClose }: CheckoutModalProps) {
             if (verifyData.success) {
               savedRef.current = true;
               setSavedOrderId(verifyData.orderId);
+              setSnapshotItems([...cartItems]);
+              setSnapshotTotal(cartTotal);
               saveUserProfile({
                 email: currentUser?.email || form.email,
                 fullName: form.name,
@@ -452,11 +460,26 @@ export function CheckoutModal({ open, onClose }: CheckoutModalProps) {
             </div>
 
             {/* Delivery Notice Banner */}
-            <div className="bg-[#F5A623]/10 border border-[#F5A623]/30 rounded-xl p-3 mb-4 flex items-center gap-2.5 text-xs text-foreground">
-              <Truck size={18} className="text-[#F5A623] shrink-0" />
-              <div>
-                <span className="font-bold text-[#F5A623]">Local Free Delivery: </span>
-                <span>Free delivery within {siteConfig.freeDeliveryRadiusKm || 4}km of our shop in Talegaon, Pune!</span>
+            <div className="bg-[#F5A623]/10 border border-[#F5A623]/30 rounded-xl p-3.5 mb-4 space-y-2.5 text-xs text-foreground">
+              <div className="flex items-center gap-2.5">
+                <Truck size={18} className="text-[#F5A623] shrink-0" />
+                <div>
+                  <span className="font-bold text-[#F5A623]">Local Free Delivery: </span>
+                  <span>Free delivery within {siteConfig.freeDeliveryRadiusKm || 4}km of our shop in Talegaon Dabhade, Pune!</span>
+                </div>
+              </div>
+              <div className="bg-background/90 border border-border/60 rounded-lg p-2.5 flex items-center justify-between gap-3">
+                <div className="text-[11px] text-muted-foreground leading-snug">
+                  📍 <strong className="text-foreground">Beyond {siteConfig.freeDeliveryRadiusKm || 4}km radius?</strong> Please contact the shop owner to check delivery availability and charges before placing your order.
+                </div>
+                <a
+                  href={`https://wa.me/${siteConfig.whatsapp || "919960878712"}?text=Hi%20Prasad!%20My%20location%20is%20beyond%204km.%20Please%20let%20me%20know%20delivery%20availability.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#25D366] hover:bg-[#20bd59] text-white font-bold px-3 py-1.5 rounded-lg text-[11px] shrink-0 transition-colors inline-flex items-center gap-1 shadow-sm"
+                >
+                  Contact Owner →
+                </a>
               </div>
             </div>
 
@@ -614,7 +637,7 @@ export function CheckoutModal({ open, onClose }: CheckoutModalProps) {
               Prasad will call you at <strong>{form.phone || "your number"}</strong> to confirm delivery.
             </p>
             <div className="bg-card border border-card-border rounded-xl p-4 text-left text-sm mb-6 space-y-2">
-              {cartItems.map((item) => (
+              {snapshotItems.map((item) => (
                 <div key={item.product.id} className="flex justify-between">
                   <span>
                     {item.product.name} × {item.quantity}
@@ -626,7 +649,7 @@ export function CheckoutModal({ open, onClose }: CheckoutModalProps) {
               ))}
               <div className="flex justify-between font-bold text-[#F5A623] border-t border-border pt-2 mt-2">
                 <span>Total</span>
-                <span>₹{total.toLocaleString("en-IN")}</span>
+                <span>₹{snapshotTotal.toLocaleString("en-IN")}</span>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
