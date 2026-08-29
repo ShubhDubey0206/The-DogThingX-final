@@ -123,9 +123,9 @@ export default function AdminProductsPage() {
   const uploadImage = async (file: File): Promise<string> => {
     const ext = file.name.split('.').pop();
     const path = `${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('product-images').upload(path, file);
+    const { error } = await supabase.storage.from('product images').upload(path, file);
     if (error) throw error;
-    const { data } = supabase.storage.from('product-images').getPublicUrl(path);
+    const { data } = supabase.storage.from('product images').getPublicUrl(path);
     return data.publicUrl;
   };
 
